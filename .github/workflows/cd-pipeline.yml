@@ -1,0 +1,41 @@
+# .github/workflows/cd-pipeline.yml
+name: IICS CD Pipeline - Production Deployment
+
+on:
+  push:
+    branches:
+      - main  # Kích hoạt khi có push/merge vào nhánh main
+
+jobs:
+  deploy-to-production:
+    runs-on: ubuntu-latest
+    environment: production # Chỉ định môi trường để có thể thêm các rule phê duyệt
+
+    steps:
+      - name: 1. Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 2. Setup Informatica CLI
+        run: |
+          echo "Setting up Informatica CLI..."
+          # (Tương tự như CI pipeline)
+
+      - name: 3. Login to IICS Production Environment
+        run: |
+          # ./iics-asset-mgmt-cli/iics.sh login \
+          #   -u ${{ secrets.IICS_PROD_USERNAME }} \
+          #   -p ${{ secrets.IICS_PROD_PASSWORD }}
+          echo "Logged in to IICS Production."
+
+      - name: 4. Deploy assets to Production
+        run: |
+          # Lấy các assets từ nhánh main và import vào môi trường Prod
+          # ./iics-asset-mgmt-cli/iics.sh import \
+          #   --zipFilePath ./exported-assets.zip \
+          #   --conflictResolution OVERWRITE
+          echo "Deployment to Production successful!"
+
+      - name: 5. Logout from IICS
+        run: |
+          # ./iics-asset-mgmt-cli/iics.sh logout
+          echo "Logged out from IICS."
