@@ -2,7 +2,7 @@ pipeline {
   agent any
   environment {
     // credentials('github-token') là ID credential trên Jenkins (nếu cần)
-    GITHUB_TOKEN = credentials('github-token')
+    GITHUB_TOKEN = credentials('iics-git-pat')
   }
   stages {
     stage('Checkout') {
