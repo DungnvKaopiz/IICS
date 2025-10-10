@@ -34,17 +34,21 @@ pipeline {
             // Expose TASK_ID / TASK_TYPE from the env file to the shell and Jenkins env
             withEnv(envPairs) {
               // Run trigger script and capture outputs
-              def out = sh(script: 'python3 test_scripts/trigger_iics_job.py', returnStdout: true).trim()
+              def out = sh(script: '''
+  export IICS_USER="${IICS_USER}"
+  export IICS_PASS="${IICS_PASS}"
+  python3 test_scripts/trigger_iics_job.py
+''', returnStdout: true).trim()
               echo out
               def runIdMatcher = (out =~ /::set-output name=runId::(.*)/)
               def serverUrlMatcher = (out =~ /::set-output name=serverUrl::(.*)/)
               def sessionIdMatcher = (out =~ /::set-output name=sessionId::(.*)/)
-              if (runIdMatcher.size() == 0) {
+              if (!runIdMatcher) {
                 error('Failed to obtain runId from trigger script output')
               }
               env.RUN_ID = runIdMatcher[0][1].trim()
-              env.SERVER_URL = serverUrlMatcher.size() ? serverUrlMatcher[0][1].trim() : ''
-              env.SESSION_ID = sessionIdMatcher.size() ? sessionIdMatcher[0][1].trim() : ''
+              env.SERVER_URL = serverUrlMatcher ? serverUrlMatcher[0][1].trim() : ''
+              env.SESSION_ID = sessionIdMatcher ? sessionIdMatcher[0][1].trim() : ''
               // Make sure Jenkins env contains TASK_ID / TASK_TYPE for downstream steps
               env.TASK_ID = env.TASK_ID ?: "${TASK_ID}"
               env.TASK_TYPE = env.TASK_TYPE ?: "${TASK_TYPE}"
